@@ -2,6 +2,7 @@ package mapreduce
 
 import (
 	"encoding/json"
+	"io"
 	"log"
 	"os"
 )
@@ -45,8 +46,10 @@ func doReduce(
 		for {
 			err := decoder.Decode(&kv)
 			if err != nil {
-				debug("Stop for loop with err: %v\n", err)
-				break
+				if err == io.EOF {
+					break
+				}
+				log.Fatalf("Stop for loop with unexpected err: %v\n", err)
 			}
 			if values, ok := keyValueMap[kv.Key]; !ok {
 				keyValueMap[kv.Key] = []string{kv.Value}
